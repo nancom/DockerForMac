@@ -19,12 +19,12 @@
 # Panupong Chantaklang
 # 06-04-2017
 # Change for list all docker images 
-
 IMAGES="$(docker images -a | awk {'print $1'})"
 
 echo "This will remove all your current containers and images except for:"
 echo ${IMAGES}
 read -p "Are you sure? [yes/NO] " -n 1 -r
+
 echo    # (optional) move to a new line
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
@@ -36,7 +36,7 @@ TMP_DIR=/tmp
 
 pushd $TMP_DIR >/dev/null
 
-#open -a Docker
+open -a Docker
 
 echo "=> Saving the specified images"
 for image in ${IMAGES}; do
@@ -56,7 +56,7 @@ done;
 echo ""
 
 echo "==> Removing Docker.qcow2 file"
-rm /Users/nancom/Tools/Docker/Docker.qcow2
+rm Docker.qcow2
 
 echo "==> Launching Docker"
 open -a Docker
@@ -70,12 +70,14 @@ echo ""
 echo "=> Done."
 
 echo "=> Loading saved images"
-for image in ${IMAGES}; do
-	echo "==> Loading ${image}"
-	tar=$(echo -n ${image} | base64)
-	docker load -q -i ${tar}.tar || exit 1
-	echo "==> Done."
+ARC_IMAGES="$(ls -ltr /tmp/*.tar | awk {'print $9'})"
+for image in ${ARC_IMAGES}; do
+        echo "==> Loading ${image}"
+        tar=$(echo -n ${image})
+        docker load -q -i ${tar} || exit 1
+        echo "==> Done."
 done
 
-popd >/dev/null
-rm -r ${TMP_DIR}
+rm -rf ${TMP_DIR}/*.tar
+
+echo "==> Finished."
